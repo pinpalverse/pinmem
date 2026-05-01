@@ -49,7 +49,7 @@ void pfree(void* p, int tracker)
             }
             if (unused > 0)
             {
-                pinlog(WARN, "PINMEM: %d %s not used", unused,
+                pinlog(WARN, "PINMEM: Tracker %d: %d %s not used", tracker, unused,
                        unused > 1 ? "bytes were" : "byte was");
             }
         }
