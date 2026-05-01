@@ -6,7 +6,7 @@ int main(){
     PIN_DEBUG = true;
     PIN_DEBUG_WHEN_UNUSED = true;
 
-    char* buf = pmalloc(10, 1);
+    char* buf = pmalloc(100, 1);
     strcpy(buf, "Hi there");
 
     printf("%s\n", buf);
