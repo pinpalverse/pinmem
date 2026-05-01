@@ -4,7 +4,7 @@
 
 int main(){
     PIN_DEBUG = true;
-    PIN_DEBUG_WHEN_UNUSED = true;
+    PIN_SHOW_DEBUG_WHEN_UNUSED = true;
 
     char* buf = pmalloc(100, 1);
     strcpy(buf, "Hi there");
