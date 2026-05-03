@@ -14,7 +14,6 @@
 
 static bool PIN_DEBUG = false;
 static bool PIN_SHOW_DEBUG_WHEN_UNUSED = true;
-static bool PIN_INTELLIGENT_DEBUG = false;
 
 static int _alloctable[STACK_SIZE] = {[0 ... STACK_SIZE - 1] = -1}; // GCC extension
 
