@@ -9,20 +9,28 @@
 #include "pinlog/pinlog.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include "pincrypto/pincrypto.h"
 
 
 static bool PIN_DEBUG = false;
-static int _alloctable[STACK_SIZE] = {[0 ... STACK_SIZE-1] = -1}; // GCC extension
 static bool PIN_SHOW_DEBUG_WHEN_UNUSED = true;
+static bool PIN_INTELLIGENT_DEBUG = false;
+
+static int _alloctable[STACK_SIZE] = {[0 ... STACK_SIZE - 1] = -1}; // GCC extension
 
 
-// Run after main() to check for any left overs
-
+// Runs after main() to check for any left overs
 __attribute__((destructor))
-void postmain(){
-    for(int i = 0; i < STACK_SIZE; i++){
-        if(_alloctable[i] != -1){
-            pinlog(WARN,"Memory of tracker No:%d  was not freed",i);
+void postmain()
+{
+    if (PIN_DEBUG)
+    {
+        for (int i = 0; i < STACK_SIZE; i++)
+        {
+            if (_alloctable[i] != -1)
+            {
+                pinlog(WARN, "Memory of tracker No:%d  was not freed", i);
+            }
         }
     }
 }
@@ -34,7 +42,8 @@ void *pmalloc(size_t size, int tracker)
     {
         if (tracker >= STACK_SIZE || tracker < 0) {pinlog(ERROR, "Tracker No:%d is not within the stack range [0, %d], if a must, change the stack size. Skipping tracking", tracker, STACK_SIZE);}
         else if (_alloctable[tracker] != -1) {pinlog(ERROR, "Tracker No:%d is already in use. Skipping tracking", tracker);}
-        else{
+        else
+        {
             _alloctable[tracker] = size;
             memset(s, SENTINEL, size);
         }
@@ -72,7 +81,6 @@ void pfree(void* p, int tracker)
     {
         if (PIN_SHOW_DEBUG_WHEN_UNUSED) pinlog(INFO, "Nothing being tracked");
     }
-
     free(p);
 }
 
