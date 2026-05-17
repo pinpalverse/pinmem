@@ -1,16 +1,14 @@
-#include "pinmem.h"
+#include "pinmem_lite.h"
 #include <stdio.h>
 #include <string.h>
 
-    // _dump_mem_table();
 int main(){
     PIN_DEBUG = true;
 
-    char* buf = pmalloc(100);
+    char* buf = pmalloc(100,1);
     strcpy(buf, "Hi there");
-    // _dump_mem_table();
     printf("%s\n", buf);
-    pfree(buf);
+    pfree(buf,1);
 
     return 0;
 }

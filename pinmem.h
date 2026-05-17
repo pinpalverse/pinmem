@@ -12,10 +12,12 @@
 #include "pincrypto/pincrypto.h"
 
 
-static bool PIN_DEBUG = false;
-static bool PIN_SHOW_DEBUG_WHEN_UNUSED = true;
+typedef struct{int size; void* ptr; bool used;} PINMT ;
+static bool PIN_DEBUG = true;
 
-static int _alloctable[STACK_SIZE] = {[0 ... STACK_SIZE - 1] = -1}; // GCC extension
+
+static PINMT _alloctable[STACK_SIZE] = {[0 ... STACK_SIZE -1] = {.size = -1, .ptr=nullptr,.used=false}}; // gcc extension
+int count = 0;
 
 
 // Runs after main() to check for any left overs
@@ -24,63 +26,66 @@ void postmain()
 {
     if (PIN_DEBUG)
     {
-        for (int i = 0; i < STACK_SIZE; i++)
-        {
-            if (_alloctable[i] != -1)
-            {
-                pinlog(WARN, "Memory of tracker No:%d  was not freed", i);
-            }
+        for(int i = 0; i < count;i++){
+            if(_alloctable[i].used) pinlog(WARN, "Pointer %p (of size %d) was not freed",_alloctable[i].ptr,_alloctable[i].size);
         }
     }
 }
 
-void *pmalloc(size_t size, int tracker)
+void *pmalloc(size_t size)
 {
-    void *s = (void*)malloc(size);
-    if (PIN_DEBUG)
-    {
-        if (tracker >= STACK_SIZE || tracker < 0) {pinlog(ERROR, "Tracker No:%d is not within the stack range [0, %d], if a must, change the stack size. Skipping tracking", tracker, STACK_SIZE);}
-        else if (_alloctable[tracker] != -1) {pinlog(ERROR, "Tracker No:%d is already in use. Skipping tracking", tracker);}
-        else
-        {
-            _alloctable[tracker] = size;
-            memset(s, SENTINEL, size);
-        }
+    if(count < STACK_SIZE && !_alloctable[count].used){
+        _alloctable[count].ptr = (void*)malloc(size);
+        memset(_alloctable[count].ptr, SENTINEL, size);
+        _alloctable[count].size = size;
+        _alloctable[count++].used = true;
+    }else{
+        if(PIN_DEBUG) pinlog(WARN, "Stack table ran out of space (STACKSIZE: %d, please increase it)",STACK_SIZE);
+        return  nullptr;
     }
-    else
-    {
-        if (PIN_SHOW_DEBUG_WHEN_UNUSED) pinlog(INFO, "Nothing being tracked");
-    }
-    return s;
+    return _alloctable[count-1].ptr;
 }
 
-void pfree(void* p, int tracker)
+
+void _dump_mem_table(){
+    for(int i = 0; i < count;i++){
+        if(_alloctable[i].size > 0){
+            printf("== [%d] -> %p='%s' of size %d ==\n", i, _alloctable[i].ptr,(char*)_alloctable[i].ptr, _alloctable[i].size);
+        }
+}
+}
+
+void pfree(void* p)
 {
-    if (PIN_DEBUG)
-    {
-        if (tracker >= STACK_SIZE || tracker < 0) {pinlog(ERROR, "Tracker No:%d is not within the stack range [0, %d], if a must, change the stack size. Skipping tracking", tracker, STACK_SIZE);}
-        else if (_alloctable[tracker] == -1) {pinlog(WARN, "The pointer you are trying to free up was not allocated through pmalloc or the tracker you have used is wrong, so no analysis will be done");}
-        else
-        {
+    for(int i = 0; i < count;i++){
+        if(_alloctable[i].ptr == p){
+
             unsigned char *data = (unsigned char *)p;
             int unused = 0;
-            for (int i = 0; i < _alloctable[tracker]; i++)
-            {
+            for (int j = 0; j < _alloctable[i].size; j++) {
                 if (*data++ == SENTINEL) unused++;
             }
-            if (unused > 0)
+            if (unused > 0 && PIN_DEBUG)
             {
-                pinlog(WARN, "PINMEM: Tracker No:%d -> %d %s not used", tracker, unused,
+                pinlog(INFO, "PINMEM: %d %s not used", unused,
                        unused > 1 ? "bytes were" : "byte was");
             }
+
+            free(_alloctable[i].ptr);
+            _alloctable[i].size = 0;
+            _alloctable[i].used = false;
+            
+            for (int k = i; k < count - 1; k++) {
+                _alloctable[k] = _alloctable[k + 1];
+            }
+
+            if(count > 1) count--;
+            return;
         }
-        _alloctable[tracker] = -1;
     }
-    else
-    {
-        if (PIN_SHOW_DEBUG_WHEN_UNUSED) pinlog(INFO, "Nothing being tracked");
+    if(PIN_DEBUG){
+        pinlog(WARN, "Pointer %p was not found in pinmem's allocation table",p);
     }
-    free(p);
 }
 
 
