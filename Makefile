@@ -1,4 +1,4 @@
 all:
-	gcc example.c  -o example -Wall -Wextra
+	gcc example.c -g -o example -Wall -Wextra
 clean:
 	rm example
