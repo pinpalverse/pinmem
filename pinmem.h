@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "pincrypto/pincrypto.h"
+#include <errno.h>
 
 #define pmalloc(size,...) { _pmalloc(size, __FILE_NAME__, __func__, __LINE__) };  // The '...' is added for cross-operability between pinmem and pinmem-lite
 
@@ -32,13 +33,45 @@ void postmain()
     {
         for (int i = 0; i < count; i++)
         {
-            if (_alloctable[i].used) pinlog(WARN, "Pointer %p(%s:%s:%d) (of size %d) was not freed",
-                                                _alloctable[i].ptr, _alloctable[i].filename, _alloctable[i].function, _alloctable[i].line, _alloctable[i].size);
+            if (_alloctable[i].used) pinlog(WARN,
+                                                "Pointer %p(%s:%s:%d) (of size %d) was not freed",
+                                                _alloctable[i].ptr, _alloctable[i].filename, _alloctable[i].function,
+                                                _alloctable[i].line, _alloctable[i].size);
         }
     }
 };
 
-void *_pmalloc(size_t size, const char* filename, const char* function, int line)
+void *prealloc(void* p, size_t new_size)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (_alloctable[i].ptr == p)
+        {
+            _alloctable[i].ptr = realloc(_alloctable[i].ptr, new_size);
+            _alloctable[i].size = new_size;
+            return _alloctable[i].ptr;
+        }
+    }
+    if (PIN_DEBUG)
+    {
+        pinlog(WARN, "Pointer %p was not found in pinmem's allocation table", p);
+    }
+    return nullptr;
+}
+
+void *preallocarray(void* optr, size_t nmemb, size_t elem_size)
+{
+    size_t bytes;
+    if (__builtin_mul_overflow (nmemb, elem_size, &bytes))
+    {
+        pinlog(ERROR, "overflow detected");
+        return nullptr;
+    }
+    return realloc (optr, bytes);
+}
+
+void *_pmalloc(size_t size, const char* filename, const char* function,
+               int line)
 {
     if (count < STACK_SIZE && !_alloctable[count].used)
     {
@@ -68,15 +101,17 @@ void _dump_mem_table()
     {
         if (_alloctable[i].size > 0)
         {
-            
             printf("== [%d] -> %p(%s:%s:%d)='", i, _alloctable[i].ptr,
                    _alloctable[i].filename, _alloctable[i].function, _alloctable[i].line);
-            if(_alloctable[i].size > 100){
-            fwrite(_alloctable[i].ptr,1,48, stdout);
-            printf("....");
-            fwrite((void*)&_alloctable[i].ptr[_alloctable[i].size-48],1,48, stdout);
-            }else{
-                fwrite(_alloctable[i].ptr,1,_alloctable[i].size, stdout);
+            if (_alloctable[i].size > 100)
+            {
+                fwrite(_alloctable[i].ptr, 1, 48, stdout);
+                printf("....");
+                fwrite((void*)&_alloctable[i].ptr[_alloctable[i].size - 48], 1, 48, stdout);
+            }
+            else
+            {
+                fwrite(_alloctable[i].ptr, 1, _alloctable[i].size, stdout);
             }
             printf("' of size %d ==\n", _alloctable[i].size);
         }

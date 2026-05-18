@@ -7,5 +7,4 @@ Features:
 
 To add:
 - calloc
-- realloc
-- reallocarray
+- hash map instead of array for O(1) -- instead of O(n) -- lookups
