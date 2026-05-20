@@ -14,6 +14,7 @@
 
 #define pmalloc(size,...) { _pmalloc(size, __FILE_NAME__, __func__, __LINE__) };  // The '...' is added for cross-operability between pinmem and pinmem-lite
 
+#define pfree(p,...) { _pfree(p, __FILE_NAME__, __func__, __LINE__)}
 
 typedef struct {int size; void *ptr; bool used; char *filename; char *function; int line;} PINMT;
 static bool PIN_DEBUG = true;
@@ -101,7 +102,7 @@ void _dump_mem_table()
     {
         if (_alloctable[i].size > 0)
         {
-            printf("== [%d] -> %p(%s:%s:%d)='", i, _alloctable[i].ptr,
+            printf("== [%d] -> %p(%s:%s():%d)='", i, _alloctable[i].ptr,
                    _alloctable[i].filename, _alloctable[i].function, _alloctable[i].line);
             if (_alloctable[i].size > 100)
             {
@@ -118,7 +119,8 @@ void _dump_mem_table()
     }
 }
 
-void pfree(void* p, ...)
+void _pfree(void* p, const char* filename, const char* function,
+               int line)
 {
     for (int i = 0; i < count; i++)
     {
@@ -132,7 +134,7 @@ void pfree(void* p, ...)
             }
             if (unused > 0 && PIN_DEBUG)
             {
-                pinlog(INFO, "PINMEM: %p(%s:%s:%d) %d %s not used", _alloctable[i].ptr,
+                pinlog(INFO, "PINMEM: %p(%s:%s():%d) %d %s not used", _alloctable[i].ptr,
                        _alloctable[i].filename, _alloctable[i].function, _alloctable[i].line, unused,
                        unused > 1 ? "bytes were" : "byte was");
             }
@@ -155,7 +157,7 @@ void pfree(void* p, ...)
     }
     if (PIN_DEBUG)
     {
-        pinlog(WARN, "Pointer %p was not found in pinmem's allocation table", p);
+        pinlog(WARN, "Pointer %p(%s:%s():%d) was not found in pinmem's allocation table", p, filename,function,line);
     }
 }
 
