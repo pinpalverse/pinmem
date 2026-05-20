@@ -73,6 +73,9 @@ void *preallocarray(void* optr, size_t nmemb, size_t elem_size)
 void *_pmalloc(size_t size, const char* filename, const char* function,
                int line)
 {
+    if(PIN_DEBUG){
+        pinlog(INFO, "Attemping to allocate %d bytes for pointer in %s:%s():%d",size,filename,function,line);
+    }
     if (count < STACK_SIZE && !_alloctable[count].used)
     {
         _alloctable[count].ptr = (void*)malloc(size);
@@ -87,8 +90,8 @@ void *_pmalloc(size_t size, const char* filename, const char* function,
     }
     else
     {
-        if (PIN_DEBUG) pinlog(WARN,
-                                  "Stack table ran out of space (STACKSIZE: %d, please increase it)", STACK_SIZE);
+        pinlog(WARN,
+                                  "Stack table ran out of space (%s:%s():%d) (STACKSIZE: %d, please increase it)",filename,function,line, STACK_SIZE);
         return  nullptr;
     }
     return _alloctable[count - 1].ptr;
