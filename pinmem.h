@@ -14,11 +14,10 @@
 
 #define pmalloc(size,...) { _pmalloc(size, __FILE_NAME__, __func__, __LINE__) };  // The '...' is added for cross-operability between pinmem and pinmem-lite
 
-#define pfree(p,...) { _pfree(p, __FILE_NAME__, __func__, __LINE__)}
+#define pfree(p,...) { _pfree(p, __FILE_NAME__, __func__, __LINE__);};
 
 typedef struct {int size; void *ptr; bool used; char *filename; char *function; int line;} PINMT;
 static bool PIN_DEBUG = true;
-
 
 static PINMT _alloctable[STACK_SIZE] = {[0 ... STACK_SIZE - 1] = {.size = -1, .ptr = nullptr, .used = false}}; // gcc extension
 int count = 0;
@@ -120,7 +119,7 @@ void _dump_mem_table()
 }
 
 void _pfree(void* p, const char* filename, const char* function,
-               int line)
+            int line)
 {
     for (int i = 0; i < count; i++)
     {
@@ -157,7 +156,9 @@ void _pfree(void* p, const char* filename, const char* function,
     }
     if (PIN_DEBUG)
     {
-        pinlog(WARN, "Pointer %p(%s:%s():%d) was not found in pinmem's allocation table", p, filename,function,line);
+        pinlog(WARN,
+               "Pointer %p(%s:%s():%d) was not found in pinmem's allocation table", p,
+               filename, function, line);
     }
 }
 
