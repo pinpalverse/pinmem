@@ -18,7 +18,7 @@
 
 typedef struct {int size; void *ptr; bool used; char *filename; char *function; int line;} PINMT;
 static bool PIN_DEBUG = true;
-
+static bool PIN_DEBUG_ALLOCATION_ATTEMPT = false;
 static PINMT _alloctable[STACK_SIZE] = {[0 ... STACK_SIZE - 1] = {.size = -1, .ptr = nullptr, .used = false}}; // gcc extension
 int count = 0;
 
@@ -73,7 +73,7 @@ void *preallocarray(void* optr, size_t nmemb, size_t elem_size)
 void *_pmalloc(size_t size, const char* filename, const char* function,
                int line)
 {
-    if(PIN_DEBUG){
+    if (PIN_DEBUG_ALLOCATION_ATTEMPT){
         pinlog(INFO, "Attemping to allocate %d bytes for pointer in %s:%s():%d",size,filename,function,line);
     }
     if (count < STACK_SIZE && !_alloctable[count].used)
