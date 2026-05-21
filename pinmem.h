@@ -153,7 +153,7 @@ void _pfree(void* p, const char* filename, const char* function,
             {
                 _alloctable[k] = _alloctable[k + 1];
             }
-            if (count > 1) count--;
+            if (count >= 1) count--;
             return;
         }
     }
