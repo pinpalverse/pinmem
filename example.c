@@ -1,4 +1,4 @@
-#include "pinmem.h"
+#include <pinmem/pinmem.h>
 #include <stdio.h>
 #include <string.h>
 

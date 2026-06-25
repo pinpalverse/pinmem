@@ -1,4 +1,4 @@
-#include "pinmem_lite.h"
+#include <pinmem/pinmem_lite.h>
 #include <stdio.h>
 #include <string.h>
 
