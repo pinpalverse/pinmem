@@ -3,25 +3,7 @@
 // stack array to store sizes
 
 
-#ifndef __PIN_MEM
-#define __PIN_MEM
-
-#define SENTINEL 0xDE
-#define STACK_SIZE 1024
-
-#include <stdlib.h>
-#include <string.h>
-#include "pinlog/pinlog.h"
-#include <stdio.h>
-#include <stdbool.h>
-#include "pincrypto/pincrypto.h"
-
-
-static bool PIN_DEBUG = false;
-static bool PIN_SHOW_DEBUG_WHEN_UNUSED = true;
-
-static int _alloctable[STACK_SIZE] = {[0 ... STACK_SIZE - 1] = -1}; // GCC extension
-
+#include "../include/pinmem/pinmem_lite.h"
 
 // Runs after main() to check for any left overs
 __attribute__((destructor))
@@ -89,4 +71,4 @@ void pfree(void* p, int tracker)
 }
 
 
-#endif
+
