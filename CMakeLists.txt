@@ -7,19 +7,21 @@ include(GNUInstallDirs)
 # ---------------------------------------------------------------------
 find_package(pinlog REQUIRED)
 
-# ---------------------------------------------------------------------
-# RPATH settings (for build-tree and installed executables)
-# ---------------------------------------------------------------------
-# Get the directory where libpinlog.so lives (from its imported target)
-get_target_property(PINLOG_LOCATION pinlog::pinlog IMPORTED_LOCATION)
-get_filename_component(PINLOG_DIR ${PINLOG_LOCATION} DIRECTORY)
 
-# Build-time RPATH: look for libpinmem in build dir and libpinlog in its install dir
-set(CMAKE_BUILD_RPATH "${CMAKE_CURRENT_BINARY_DIR}:${PINLOG_DIR}")
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
-# Install-time RPATH: look for libraries in the final install prefix
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
+set(CMAKE_BUILD_RPATH 
+    "${CMAKE_CURRENT_BINARY_DIR}:$<TARGET_FILE_DIR:pinlog::pinlog>"
+)
+
+# Install-time: look in the standard library install directory
+set(CMAKE_INSTALL_RPATH 
+    "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
+)
 
 # ---------------------------------------------------------------------
 # Libraries
@@ -103,7 +105,7 @@ file(WRITE ${CONFIG_TEMPLATE}
 "@PACKAGE_INIT@
 
 # Find our dependency
-find_dependency(pinlog REQUIRED)
+find_package(pinlog REQUIRED)
 
 # Import targets
 include(\${CMAKE_CURRENT_LIST_DIR}/pinmemTargets.cmake)
