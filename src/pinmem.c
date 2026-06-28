@@ -4,7 +4,6 @@
 
 // Runs after main() to check for any left overs
 __attribute__((destructor)) void postmain() {
-  pinlog(INFO, "Hi there");
   if (!PINMEM_DEBUG) return;
   for (int i = 0; i < count; i++) {
     if (_alloctable[i].used) pinlog(WARN,
@@ -47,8 +46,6 @@ void* preallocarray(void* optr, size_t nmemb, size_t elem_size) {
 }
 void* _pmalloc(size_t size, const char* filename, const char* function,
                int line) {
-  pinlog(INFO, "%s %s\n", PINMEM_DEBUG ? "true" : "false", PINMEM_DEBUG_ALLOCATION_ATTEMPT ? "true" : "false");
-
   if (!PINMEM_DEBUG) {
     return malloc(size);
   }

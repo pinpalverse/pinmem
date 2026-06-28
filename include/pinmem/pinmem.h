@@ -12,11 +12,11 @@
 #include <string.h>
 
 #ifndef PINMEM_DEBUG
-#define PINMEM_DEBUG true
+#define PINMEM_DEBUG 1
 #endif
 
 #ifndef PINMEM_DEBUG_ALLOCATION_ATTEMPT
-#define PINMEM_DEBUG_ALLOCATION_ATTEMPT true
+#define PINMEM_DEBUG_ALLOCATION_ATTEMPT 1
 #endif
 
 #define pmalloc(size, ...)                                                                                                       \
