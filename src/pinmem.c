@@ -131,3 +131,6 @@ void _pfree(void* p, const char* filename, const char* function,
          function,
          line);
 }
+
+void set_pinmem_debug(bool flag) { PINMEM_DEBUG = flag; }
+void set_pinmem_debug_allocation_attempt(bool flag) { PINMEM_DEBUG_ALLOCATION_ATTEMPT = flag; }

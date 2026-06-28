@@ -24,7 +24,6 @@ set(CMAKE_INSTALL_RPATH
 )
 
 
-add_compile_definitions(PINMEM_DEBUG=0 PINMEM_DEBUG_ALLOCATION_ATTEMPT=0)
 
 # ---------------------------------------------------------------------
 # Libraries

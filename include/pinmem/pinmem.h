@@ -11,14 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef PINMEM_DEBUG
-#define PINMEM_DEBUG 1
-#endif
-
-#ifndef PINMEM_DEBUG_ALLOCATION_ATTEMPT
-#define PINMEM_DEBUG_ALLOCATION_ATTEMPT 1
-#endif
-
 #define pmalloc(size, ...)                                                                                                       \
   _pmalloc(size, __FILE_NAME__, __func__, __LINE__);  // The '...' is added for cross-operability between pinmem and pinmem-lite
 
@@ -26,6 +18,9 @@
   {                                               \
     _pfree(p, __FILE_NAME__, __func__, __LINE__); \
   };
+
+static int PINMEM_DEBUG = 1;
+static int PINMEM_DEBUG_ALLOCATION_ATTEMPT = 1;
 
 typedef struct {
   int size;
@@ -53,4 +48,6 @@ void _dump_mem_table();
 void _pfree(void* p, const char* filename, const char* function,
             int line);
 
+void set_pinmem_debug(bool);
+void set_pinmem_debug_allocation_attempt(bool);
 #endif

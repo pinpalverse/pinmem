@@ -3,8 +3,8 @@
 #include <string.h>
 
 int main() {
-  // Must be changed from CMakeLists.txt due to the pipelining of the compilation process
-  printf("%s %s\n", PINMEM_DEBUG ? "true" : "false", PINMEM_DEBUG_ALLOCATION_ATTEMPT ? "true" : "false");
+  set_pinmem_debug(false);
+  set_pinmem_debug_allocation_attempt(false);
 
   char* buf = pmalloc(150);
   strcpy(buf, "Hi there sdfokksdfoksdofksdofkok");
