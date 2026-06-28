@@ -1,16 +1,18 @@
-#include <pinmem/pinmem.h>
+// #define PINMEM_DEBUG false
+// #define PINMEM_DEBUG_ALLOCATION_ATTEMPT false
+
 #include <stdio.h>
 #include <string.h>
 
-    // _dump_mem_table();
-int main(){
-    PIN_DEBUG = true;
+#include "include/pinmem/pinmem.h"
 
-    char* buf = pmalloc(150);
-    strcpy(buf, "Hi there sdfokksdfoksdofksdofkok");
-    _dump_mem_table();
-    printf("%s\n", buf);
-    pfree(buf);
+int main() {
+  printf("%s %s\n", PINMEM_DEBUG ? "true" : "false", PINMEM_DEBUG_ALLOCATION_ATTEMPT ? "true" : "false");
+  char* buf = pmalloc(150);
+  strcpy(buf, "Hi there sdfokksdfoksdofksdofkok");
+  _dump_mem_table();
+  printf("%s\n", buf);
+  pfree(buf);
 
-    return 0;
+  return 0;
 }
